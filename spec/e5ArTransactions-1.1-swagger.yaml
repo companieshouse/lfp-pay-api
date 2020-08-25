@@ -1,0 +1,498 @@
+openapi: 3.0.0
+info:
+  version: '1.0'
+  title: 'AR Transactions and Payments API'
+  description: 'An API to query and update AR transactions.'
+paths:
+  /arTransactions:
+    get:
+      description: Return a list of all AR transactions within a company.
+      parameters:
+        - $ref: '#/components/parameters/advUsernameParam'
+        - $ref: '#/components/parameters/companyCodeParam'
+        - $ref: '#/components/parameters/fromDateParam'
+        - $ref: '#/components/parameters/toDateParam'
+        - $ref: '#/components/parameters/transactionTypeParam'
+        - $ref: '#/components/parameters/transactionSubTypeParam'
+      responses:
+        '200':
+          description: Successfully returned a list of all AR transactions within a company.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  page:
+                    $ref: '#/components/schemas/Page'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ARTransaction'
+        '400':
+          description: Invalid field value.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error400'
+        '404':
+          description: Company code not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error404'
+  /arTransactions/{customerCode}:
+    get:
+      description: Return a list of all AR transactions for a customer account within a company.
+      parameters:
+        - $ref: '#/components/parameters/customerCodeParam'
+        - $ref: '#/components/parameters/advUsernameParam'
+        - $ref: '#/components/parameters/companyCodeParam'
+        - $ref: '#/components/parameters/ledgerCodeParam'
+        - $ref: '#/components/parameters/fromDateParam'
+        - $ref: '#/components/parameters/toDateParam'
+        - $ref: '#/components/parameters/transactionTypeParam'
+        - $ref: '#/components/parameters/transactionSubTypeParam'
+      responses:
+        '200':
+          description: Successfully returned a list of all AR transactions for a customer account within a company.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  page:
+                    $ref: '#/components/schemas/Page'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ARTransaction'
+        '400':
+          description: Validation failed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error400'
+        '404':
+          description: Company code not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error404'
+            
+  /arTransactions/payment:
+    post:
+      description: Indicate the intention of paying one or more AR transactions. This will lock them in E5 to avoid duplicate payments. There is a maximum of 500 transactions allowed in this list.
+      parameters:
+        - $ref: '#/components/parameters/advUsernameParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object 
+              required:
+                - companyCode
+                - customerCode
+                - paymentId
+                - paymentValue
+                - transactions
+              properties:
+                companyCode:
+                  type: string
+                  description: The 2 character company code.
+                  minLength: 2
+                  maxLength: 2
+                  example: 'XX'
+                customerCode:
+                  type: string
+                  description: The 12 character customer account number.
+                  minLength: 12
+                  maxLength: 12
+                  example: 'X12345678'
+                ledgerCode:
+                  type: string
+                  description: The 2 character ledger code.
+                  minLength: 1
+                  maxLength: 12
+                  example: 'XX'
+                paymentId:
+                  type: string
+                  description: The generated reference to link the batch allocation within e5 to the payment.
+                  minLength: 1
+                  maxLength: 12
+                  example: 'LFNRP5XZKYI'
+                paymentValue:
+                  type: number
+                  format: float
+                  description: The total payment value to be charged to the customer.
+                  minLength: 1
+                  maxLength: 12
+                  example: 150.00
+                transactions:
+                    type: array
+                    description: A list of one or more transaction references that are to be paid for the customer plus an optional allocation value if the transaction is to be part paid. There is a maximum of 500 transactions allowed in this list.
+                    items:
+                      $ref: '#/components/schemas/ARTransactionPayment'
+      responses:
+        '200':
+          description: Response of attempt to update AR transactions with intent to pay.
+        '400':
+          description: Validation failed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error400'
+        '404':
+          description: Company code not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error404'
+  /arTransactions/payment/authorise:
+    post:
+      description: Authorise a payment.
+      parameters:
+        - $ref: '#/components/parameters/advUsernameParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object 
+              required:
+                - companyCode
+                - paymentId
+                - paymentCardReference
+                - authorisationNumber
+                - cardType
+                - emailAddress
+              properties:
+                companyCode:
+                  type: string
+                  example: 'XX'
+                paymentId:
+                  type: string
+                  example: 'LFNRP5XZKYI'
+                paymentCardReference:
+                  type: string
+                  example: 'ABC123'
+                authorisationNumber:
+                  type: integer
+                  format: int32
+                  example: 765124
+                cardType:
+                  type: string
+                  example: 'MC'
+                emailAddress:
+                  type: string
+                  example: 'dennis.kirton@oneadvanced.com'
+      responses:
+        '200':
+          description: Successfully authorised a payment.
+        '400':
+          description: Validation failed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error400'
+        '404':
+          description: Company code not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error404'
+  /arTransactions/payment/confirm:
+    post:
+      description: Confirm a payment.
+      parameters:
+        - $ref: '#/components/parameters/advUsernameParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object 
+              required:
+                - companyCode
+                - paymentId
+              properties:
+                companyCode:
+                  type: string
+                  example: 'XX'
+                paymentId:
+                  type: string
+                  example: 'LFNRP5XZKYI'
+      responses:
+        '200':
+          description: Successfully confirmed a payment.
+  /arTransactions/payment/reject:
+    post:
+      description: Reject a payment.
+      parameters:
+        - $ref: '#/components/parameters/advUsernameParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object 
+              required:
+                - companyCode
+                - paymentId
+              properties:
+                companyCode:
+                  type: string
+                  example: 'XX'
+                paymentId:
+                  type: string
+                  example: 'LFNRP5XZKYI'
+      responses:
+        '200':
+          description: Successfully rejected a payment.
+  /arTransactions/payment/timeout:
+    post:
+      description: Timeout a payment.
+      parameters:
+        - $ref: '#/components/parameters/advUsernameParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object 
+              required:
+                - companyCode
+                - paymentId
+              properties:
+                companyCode:
+                  type: string
+                  example: 'XX'
+                paymentId:
+                  type: string
+                  example: 'LFNRP5XZKYI'
+      responses:
+        '200':
+          description: Successfully timed out a payment.
+components:
+  parameters:
+    advUsernameParam:
+      name: ADV_userName
+      in: query
+      required: true
+      description: e5 User Name or Alias.
+      schema:
+        type: string
+        maxLength: 10
+    companyCodeParam:
+      name: companyCode
+      in: query
+      required: true
+      description: The company code.
+      schema:
+        type: string
+        minLength: 2
+        maxLength: 2
+    customerCodeParam:
+      name: customerCode
+      in: path
+      required: true
+      description: The customer account number.
+      schema:
+        type: string
+        minLength: 12
+        maxLength: 12
+    ledgerCodeParam:
+      name: ledgerCode
+      in: query
+      required: false
+      description: The ledger code.
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 12
+    fromDateParam:
+      name: fromDate
+      in: query
+      required: true
+      description: The starting point for the retrieval of all transactions whether created or updated on or after the given date.
+      schema:
+        type: string
+        format: 'date'
+    toDateParam:
+      name: toDate
+      in: query
+      required: false
+      description: The ending point for the retrieval of all transactions whether created or updated on or before the given date.
+      schema:
+        type: string
+        format: 'date'
+    transactionTypeParam:
+      name: transactionType
+      in: query
+      required: false
+      description: The transaction type. Mandatory if transaction sub type is provided.
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 1
+    transactionSubTypeParam:
+      name: transactionSubType
+      in: query
+      required: false
+      description: The transaction sub type.
+      schema:
+        type: string
+        minLength: 2
+        maxLength: 2
+  schemas:
+    Page:
+      type: object
+      properties:
+        size:
+          type: integer
+          format: int32
+          example: 1
+        totalElements:
+          type: integer
+          format: int32
+          example: 1
+        totalPages:
+          type: integer
+          format: int32
+          example: 1
+        number:
+          type: integer
+          format: int32
+          example: 0
+    ARTransaction:
+      type: object
+      properties:
+        companyCode:
+          type: string
+          example: 'XX'
+        ledgerCode:
+          type: string
+          example: 'XX'
+        customerCode:
+          type: string
+          example: 'X12345678'
+        transactionReference:
+          type: string
+          example: 'XXX123'
+        date:
+          type: string
+          format: date
+          example: '2016-11-10'
+        madeUpDate:
+          type: string
+          format: date
+          example: '2016-11-09'
+        amount:
+          type: number
+          format: float
+          example: 150.00
+        outstandingAmount:
+          type: number
+          format: float
+          example: 150.00
+        isPaid:
+          type: boolean
+          example: false
+        transactionType:
+          type: string
+          example: '1'
+        transactionSubType:
+          type: string
+          example: '00'
+        typeDescription:
+          type: string
+          example: 'Penalty'
+        dueDate:
+          type: string
+          format: date
+          example: '2016-12-10'
+        accountStatus:
+          type: string
+          example: 'CHS'
+        dunningStatus:
+          type: string
+          example: 'PEN1'
+    ARTransactionPayment:
+      type: object
+      properties:
+        transactionReference:
+          type: string
+          example: 'XXX123'
+        allocationValue:
+          type: number
+          format: float
+          example: 150.00
+    Error400:
+      type: object 
+      properties:
+        httpStatusCode:
+          type: integer
+          format: int32
+          example: 400
+        status:
+          type: string
+          example: 'Bad Request'
+        timestamp:
+          type: string
+          format: 'datetime'
+          example: '2018-11-08T08:30:08Z'
+        messageCode:
+          type: string
+          example: 'BL101'
+        message:
+          type: string
+          example: 'Rejection message'
+        debugMessage:
+          type: string
+          example: 'Detailed rejection message'
+        subErrors:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubError'
+    Error404:
+      type: object 
+      properties:
+        httpStatusCode:
+          type: integer
+          format: int32
+          example: 404
+        status:
+          type: string
+          example: 'Not Found'
+        timestamp:
+          type: string
+          format: 'datetime'
+          example: '2018-11-08T08:30:08Z'
+        messageCode:
+          type: string
+          example: ''
+        message:
+          type: string
+          example: 'Company code not found'
+        debugMessage:
+          type: string
+          example: ''
+        subErrors:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubError'
+    SubError:
+      type: object
+      properties:
+        object:
+          type: string
+          example: 'ObjectName'
+        field:
+          type: string
+          example: 'FieldName'
+        rejectedValue:
+          type: string
+          example: 'RejectedValue'
+        message:
+          type: string
+          example: 'Rejection message'
