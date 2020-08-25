@@ -1,0 +1,583 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "LFP PAY API",
+    "description": "An API that creates, patches, and retrieves LFP sessions, as well as interacting with the E5 finance system"
+  },
+  "host": "api.companieshouse.gov.uk",
+  "basePath": "/company/{company_number}/penalties/late-filing",
+  "schemes": [
+    "https"
+  ],
+  "tags": [
+    {
+      "name": "Healthcheck"
+    },
+    {
+      "name": "Penalties"
+    },
+    {
+      "name": "Payment"
+    }
+  ],
+  "paths": {
+    "/healthcheck": {
+      "get": {
+        "tags": [
+          "Healthcheck"
+        ],
+        "description": "Check the health of the LFP PAY API Service",
+        "responses": {
+          "200": {
+            "description": "healthy"
+          }
+        }
+      }
+    },
+    "/healthcheck/finance-system": {
+      "get": {
+        "tags": [
+          "Healthcheck"
+        ],
+        "description": "Check the health of the Finance System",
+        "responses": {
+          "200": {
+            "description": "healthy"
+          },
+          "503": {
+            "description": "service unavailable",
+             "schema": {
+              "$ref": "#/definitions/ServiceUnavailable"
+            }
+          }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "tags": [
+          "Penalties"
+        ],
+        "description": "List the late filing penalties for a company. This passes through the transactions from E5 and does not cache.",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "company_number",
+            "in": "path",
+            "type": "string",
+            "required": true
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "the company does not exist"
+          },
+          "200": {
+            "description": "a list of payable transactions",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/ListResponse"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/definitions/Transaction"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "/payable": {
+      "parameters": [
+        {
+          "name": "company_number",
+          "in": "path",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "payment_id",
+          "in": "path",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "post": {
+        "tags": [
+          "Payment"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/CreatePayableResource"
+            }
+          }
+        ],
+        "description": "Create a new payable penalty resource with one or more transactions to pay for",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "201": {
+            "description": "The transactions have been marked as paid",
+            "schema": {
+              "$ref": "#/definitions/CreatedPayableResource"
+            }
+          }
+        }
+      }
+    },
+    "/payable/{id}": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "company_number",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "get": {
+        "tags": [
+          "Payment"
+        ],
+        "description": "The payable resource that includes a number of transactions relating to penalties",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "A respresentation of the full LFP payable resource",
+            "schema": {
+              "$ref": "#/definitions/PayableResource"
+            }
+          }
+        }
+      }
+    },
+    "/payable/{id}/payment": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "company_number",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "get": {
+        "tags": [
+          "Payment"
+        ],
+        "description": "List the payment details resource related to the penalty resource",
+        "responses": {
+          "200": {
+            "description": "The payment details resource read by the payment api",
+            "schema": {
+              "$ref": "#/definitions/PaymentDetails"
+            }
+          }
+        }
+      },
+      "patch": {
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/ResourceDetails"
+            }
+          }
+        ],
+        "tags": [
+          "Payment"
+        ],
+        "description": "Mark this resource as paid. This will also mark the transactions as paid in E5",
+        "responses": {
+          "204": {
+            "description": "The LFP payable resource has successfully been marked as paid"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "ServiceUnavailable": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        },
+        "maintenance_end_time": {
+          "type": "string"
+        }
+      }
+    },
+    "CreatedBy": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "forename": {
+          "type": "string"
+        },
+        "surname": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string",
+          "format": "email"
+        }
+      }
+    },
+    "ResourceDetails": {
+      "type": "object",
+      "properties": {
+        "reference": {
+          "type": "string"
+        }
+      }
+    },
+    "PayableResource": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "etag": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "created_by": {
+          "$ref": "#/definitions/CreatedBy"
+        },
+        "company_number": {
+          "type": "string"
+        },
+        "transactions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "transaction_id": {
+                "type": "string"
+              },
+              "amount": {
+                "type": "number",
+                "format": "float"
+              },
+              "made_up_date": {
+                "type": "string",
+                "format": "date"
+              },
+              "type": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "payment": {
+          "type": "object",
+          "properties": {
+            "is_paid": {
+              "type": "boolean"
+            },
+            "paid_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "reference": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "CreatePayableResource": {
+      "type": "object",
+      "properties": {
+        "transactions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "transaction_id": {
+                "type": "string"
+              },
+              "amount": {
+                "type": "number",
+                "format": "float"
+              }
+            }
+          }
+        }
+      }
+    },
+    "CreatedPayableResource": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "links": {
+          "type": "object",
+          "properties": {
+            "self": {
+              "type": "string",
+              "format": "uri"
+            }
+          }
+        }
+      }
+    },
+    "ListResponse": {
+      "type": "object",
+      "properties": {
+        "etag": {
+          "type": "string"
+        },
+        "items_per_page": {
+          "type": "integer"
+        },
+        "start_index": {
+          "type": "integer"
+        },
+        "total_results": {
+          "type": "integer"
+        }
+      }
+    },
+    "Transaction": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "the transaction reference"
+        },
+        "etag": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "is_paid": {
+          "type": "boolean",
+          "description": "indicates if this transaction has been paid"
+        },
+        "is_dca": {
+          "type": "boolean"
+        },
+        "due_date": {
+          "type": "string",
+          "format": "date",
+          "description": "when this payment of this transaction is due by"
+        },
+        "made_up_date": {
+          "type": "string",
+          "format": "date",
+          "description": "cross reference the made up date of the accounts that were late being filed"
+        },
+        "transaction_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "original_amount": {
+          "type": "number",
+          "format": "float",
+          "description": "the original amount for this transaction"
+        },
+        "outstanding": {
+          "type": "number",
+          "format": "float",
+          "description": "the amount outstanding. if this is less than the original amount, then it indicates this has been part paid"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "penalty",
+            "double-penalty",
+            "court-costs",
+            "other"
+          ]
+        }
+      }
+    },
+    "PaymentDetails": {
+      "required": [
+        "etag",
+        "kind",
+        "links",
+        "items",
+        "status"
+      ],
+      "title": "PaymentDetails",
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "The Description of the Resource",
+          "readOnly": true
+        },
+        "etag": {
+          "type": "string",
+          "description": "The ETag of the resource"
+        },
+        "kind": {
+          "type": "string",
+          "description": "The type of resource.",
+          "enum": [
+            "payment-details#payment-details"
+          ]
+        },
+        "links": {
+          "description": "A set of URLs related to the resource.",
+          "items": {
+            "$ref": "#/definitions/paymentDetailsLinks"
+          },
+          "type": "object"
+        },
+        "paid_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The date and time the payment was taken for this resource.",
+          "readOnly": true
+        },
+        "payment_reference": {
+          "type": "string",
+          "description": "The id of the payment session that paid for this resource.",
+          "readOnly": true
+        },
+        "items": {
+          "type": "array",
+          "description": "The cost items to be paid for",
+          "items": {
+            "$ref": "#/definitions/cost"
+          }
+        },
+        "status": {
+          "type": "string",
+          "description": "The status of the payment.",
+          "enum": [
+            "paid",
+            "failed",
+            "pending"
+          ]
+        }
+      }
+    },
+    "paymentDetailsLinks": {
+      "title": "links",
+      "required": [
+        "self",
+        "resource"
+      ],
+      "properties": {
+        "self": {
+          "description": "The URL of the the payment session.",
+          "type": "string"
+        },
+        "resource": {
+          "description": "The URL of the data resource that is being paid for.",
+          "type": "string"
+        }
+      }
+    },
+    "cost": {
+      "required": [
+        "description",
+        "description_identifier",
+        "class_of_payment",
+        "description_values",
+        "amount",
+        "available_payment_methods",
+        "links",
+        "kind",
+        "resource_kind"
+      ],
+      "title": "cost",
+      "properties": {
+        "description": {
+          "description": "The english description of the cost item. Derived from `description_identifier` and `description_values`.",
+          "type": "string"
+        },
+        "description_identifier": {
+          "description": "The enumuration identifier of the description.",
+          "type": "string"
+        },
+        "description_values": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "readOnly": true,
+            "description": "key / value string pair."
+          }
+        },
+        "amount": {
+          "description": "The cost item amount, in GBP.",
+          "type": "string"
+        },
+        "available_payment_methods": {
+          "description": "The payment methods that are allowed for the cost item.",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "credit-card",
+              "account"
+            ]
+          }
+        },
+        "class_of_payment": {
+          "description": "The class of payment. Items of different `class_of_payment` cannot be paid for together.",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "data-maintenance",
+              "penalty"
+            ]
+          }
+        },
+        "kind": {
+          "description": "The type of resource.",
+          "enum": [
+            "cost#cost"
+          ],
+          "type": "string"
+        },
+        "resource_kind": {
+          "description": "The `kind` of the resource this cost represents",
+          "type": "string"
+        }
+      }
+    }
+  }
+}
+
