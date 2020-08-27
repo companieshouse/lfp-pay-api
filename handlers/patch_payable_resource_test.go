@@ -168,7 +168,7 @@ func TestUnitPayResourceHandler(t *testing.T) {
 			defer mockCtrl.Finish()
 
 			// stub the response from the payments api
-			p := &companieshouseapi.PaymentResource{Status: "paid", Amount: "0"}
+			p := &companieshouseapi.PaymentResource{Status: "paid", Amount: "0", Reference: "late_filing_penalty_123"}
 			responder, _ := httpmock.NewJsonResponder(http.StatusOK, p)
 			httpmock.RegisterResponder(
 				http.MethodGet,
@@ -209,7 +209,7 @@ func TestUnitPayResourceHandler(t *testing.T) {
 			defer mockCtrl.Finish()
 
 			// stub the response from the payments api
-			p := &companieshouseapi.PaymentResource{Status: "paid", Amount: "0"}
+			p := &companieshouseapi.PaymentResource{Status: "paid", Amount: "0", Reference: "late_filing_penalty_123"}
 			responder, _ := httpmock.NewJsonResponder(http.StatusOK, p)
 			httpmock.RegisterResponder(
 				http.MethodGet,
@@ -256,7 +256,7 @@ func TestUnitPayResourceHandler(t *testing.T) {
 			defer mockCtrl.Finish()
 
 			// stub the response from the payments api
-			p := &companieshouseapi.PaymentResource{Status: "paid", Amount: "0"}
+			p := &companieshouseapi.PaymentResource{Status: "paid", Amount: "0", Reference: "late_filing_penalty_123"}
 			responder, _ := httpmock.NewJsonResponder(http.StatusOK, p)
 			httpmock.RegisterResponder(
 				http.MethodGet,
@@ -304,7 +304,7 @@ func TestUnitPayResourceHandler(t *testing.T) {
 			p := &companieshouseapi.PaymentResource{
 				Status:    "paid",
 				Amount:    "150",
-				Reference: "123",
+				Reference: "late_filing_penalty_123",
 				CreatedBy: companieshouseapi.CreatedBy{
 					Email: "test@example.com",
 				},
@@ -341,9 +341,6 @@ func TestUnitPayResourceHandler(t *testing.T) {
 				CompanyNumber: "10000024",
 				Transactions: []models.TransactionItem{
 					{TransactionID: "123", Amount: 150},
-				},
-				Payment: models.Payment{
-					Reference: "123",
 				},
 			}
 			ctx := context.WithValue(context.Background(), config.PayableResource, model)

@@ -27,6 +27,8 @@ github.com/companieshouse/gofigure v0.1.1/go.mod h1:lBAsI13q21rMce+pO7x4xUYAXzO0
 github.com/companieshouse/htmlform v0.1.0/go.mod h1:fWScPVYjGyeBhYwppGaGRDtCQ5hMd3t3Q+0I6HaUZT4=
 github.com/companieshouse/lfp-pay-api-core v1.0.2 h1:BJ77N5xlj7d+6EOy606cwY6y6G3hc19eZlP4qf8RVW0=
 github.com/companieshouse/lfp-pay-api-core v1.0.2/go.mod h1:lpjVd6q1FrDzVpRjB1GwYi7KiROFL/O4IB/33Q78jpI=
+github.com/companieshouse/lfp-pay-api-core v1.0.4 h1:vs1Ty5752GVGadaEz2rchvkfLPCbAIpm5GR+3grwZ+k=
+github.com/companieshouse/lfp-pay-api-core v1.0.4/go.mod h1:ci8LSsx89v8m7A3gdDj3oBJi9eEGNGls09LMhVipUoM=
 github.com/companieshouse/private-api-sdk-go v0.1.1 h1:scnN84r25F9NJHfz2XbSfIgUAm2x+l1JhHaWhhcUcUE=
 github.com/companieshouse/private-api-sdk-go v0.1.1/go.mod h1:e2gCeSswJosqHMbfNmx6tJ7GpyFy8iDjOYeFWVSNQDE=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
