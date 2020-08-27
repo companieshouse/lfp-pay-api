@@ -9,7 +9,7 @@ require (
 	github.com/companieshouse/go-sdk-manager v0.1.3
 	github.com/companieshouse/go-session-handler v0.1.1
 	github.com/companieshouse/gofigure v0.1.1
-	github.com/companieshouse/lfp-pay-api-core v1.0.2
+	github.com/companieshouse/lfp-pay-api-core v1.0.4
 	github.com/golang/mock v1.4.3
 	github.com/gorilla/mux v1.7.3
 	github.com/jarcoal/httpmock v1.0.4
