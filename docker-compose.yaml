@@ -1,0 +1,7 @@
+version: "3.8"
+
+services:
+  lfp-pay-api:
+    image: 169942020521.dkr.ecr.eu-west-1.amazonaws.com/local/lfp-pay-api:latest
+    expose:
+      - 4086
