@@ -1,0 +1,31 @@
+custom_build(
+  ref = '169942020521.dkr.ecr.eu-west-1.amazonaws.com/local/lfp-pay-api',
+  command = 'docker build --build-arg SSH_PRIVATE_KEY="$(cat ~/.ssh/id_rsa)" --build-arg SSH_PRIVATE_KEY_PASSPHRASE --tag $EXPECTED_REF .',
+  live_update = [
+    sync(
+      local_path = './assets',
+      remote_path = '/app/assets'
+    ),
+    restart_container()
+  ],
+  deps = [
+    './assets',
+    './config',
+    './constants',
+    './dao',
+    './e5',
+    './handlers',
+    './interceptors',
+    './middleware',
+    './mocks',
+    './models',
+    './service',
+    './spec',
+    './transformers',
+    './utils',
+    './validators',
+    './go.mod',
+    './go.sum',
+    './main.go'
+  ]
+)
