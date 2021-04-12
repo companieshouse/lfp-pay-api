@@ -13,6 +13,8 @@ github.com/companieshouse/api-sdk-go v0.1.0/go.mod h1:lf4uNUbwgU0FyJvoAToNAwNwN9
 github.com/companieshouse/chs.go v1.1.0/go.mod h1:LVtty6/5ttvNf12V/nPySaIFgfYPLeT0jymabuzmSDg=
 github.com/companieshouse/chs.go v1.1.10 h1:JVGx7aQgvupfbXmZEanSU8pHG9QUbyU5mjHdy1+4sh8=
 github.com/companieshouse/chs.go v1.1.10/go.mod h1:fI/z3fegJtQyjOWP2HSj+im96Djn399DbckG3Mi1eAo=
+github.com/companieshouse/chs.go v1.2.4 h1:zoSAZb9l6JCyX+3F2y2es95Mk7KRexhWNtBd8+q3FxM=
+github.com/companieshouse/chs.go v1.2.4/go.mod h1:93vQ2qlzSbZenUOFet+pAJzxHdz+w6BF1IvJ56lvC7c=
 github.com/companieshouse/envconf v0.1.0 h1:6EAyUYqBJsduWZQuz1AR8hxG5OwhPK0r3Y6ppcTDBmQ=
 github.com/companieshouse/envconf v0.1.0/go.mod h1:/gP4p46vTAENnqc2vXW441VOjL91ReJv/uqnYBzlaFo=
 github.com/companieshouse/filing-notification-sender v2.0.0-rc3+incompatible h1:ynMziz2BWNnAuDj4NtfBoemjqQyoJtgN2jydDg1maZA=

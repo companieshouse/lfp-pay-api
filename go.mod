@@ -4,7 +4,7 @@ go 1.12
 
 require (
 	github.com/companieshouse/api-sdk-go v0.1.0
-	github.com/companieshouse/chs.go v1.1.10
+	github.com/companieshouse/chs.go v1.2.4
 	github.com/companieshouse/filing-notification-sender v2.0.0-rc3+incompatible
 	github.com/companieshouse/go-sdk-manager v0.1.3
 	github.com/companieshouse/go-session-handler v0.1.1
