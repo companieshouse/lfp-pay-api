@@ -14,7 +14,7 @@ require (
 	github.com/gorilla/mux v1.7.3
 	github.com/jarcoal/httpmock v1.0.4
 	github.com/smartystreets/goconvey v1.6.4
-	go.mongodb.org/mongo-driver v1.4.0
+	go.mongodb.org/mongo-driver v1.8.0
 	gopkg.in/go-playground/validator.v9 v9.31.0
 	gopkg.in/jcmturner/goidentity.v3 v3.0.0 // indirect
 	gopkg.in/yaml.v2 v2.2.7
