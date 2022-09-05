@@ -1,3 +1,4 @@
+---
 openapi: 3.0.0
 info:
   version: '1.0'
@@ -16,7 +17,8 @@ paths:
         - $ref: '#/components/parameters/transactionSubTypeParam'
       responses:
         '200':
-          description: Successfully returned a list of all AR transactions within a company.
+          description: Successfully returned a list of all AR transactions 
+            within a company.
           content:
             application/json:
               schema:
@@ -42,7 +44,8 @@ paths:
                 $ref: '#/components/schemas/Error404'
   /arTransactions/{customerCode}:
     get:
-      description: Return a list of all AR transactions for a customer account within a company.
+      description: Return a list of all AR transactions
+        for a customer account within a company.
       parameters:
         - $ref: '#/components/parameters/customerCodeParam'
         - $ref: '#/components/parameters/advUsernameParam'
@@ -54,7 +57,8 @@ paths:
         - $ref: '#/components/parameters/transactionSubTypeParam'
       responses:
         '200':
-          description: Successfully returned a list of all AR transactions for a customer account within a company.
+          description: Successfully returned a list of all AR transactions
+            for a customer account within a company.
           content:
             application/json:
               schema:
@@ -78,10 +82,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error404'
-            
+
   /arTransactions/payment:
     post:
-      description: Indicate the intention of paying one or more AR transactions. This will lock them in E5 to avoid duplicate payments. There is a maximum of 500 transactions allowed in this list.
+      description: Indicate the intention of paying one or more AR 
+        transactions. This will lock them in E5 to avoid duplicate payments.
+        There is a maximum of 500 transactions allowed in this list.
       parameters:
         - $ref: '#/components/parameters/advUsernameParam'
       requestBody:
@@ -89,7 +95,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object 
+              type: object
               required:
                 - companyCode
                 - customerCode
@@ -117,25 +123,32 @@ paths:
                   example: 'XX'
                 paymentId:
                   type: string
-                  description: The generated reference to link the batch allocation within e5 to the payment.
+                  description: The generated reference to link the batch 
+                    allocation within e5 to the payment.
                   minLength: 1
                   maxLength: 12
                   example: 'LFNRP5XZKYI'
                 paymentValue:
                   type: number
                   format: float
-                  description: The total payment value to be charged to the customer.
+                  description: The total payment value to be charged 
+                    to the customer.
                   minLength: 1
                   maxLength: 12
                   example: 150.00
                 transactions:
-                    type: array
-                    description: A list of one or more transaction references that are to be paid for the customer plus an optional allocation value if the transaction is to be part paid. There is a maximum of 500 transactions allowed in this list.
-                    items:
-                      $ref: '#/components/schemas/ARTransactionPayment'
+                  type: array
+                  description: A list of one or more transaction references 
+                    that are to be paid for the customer plus an optional 
+                    allocation value if the transaction is to be part paid. 
+                    There is a maximum of 500 transactions allowed in this 
+                    list.
+                  items:
+                    $ref: '#/components/schemas/ARTransactionPayment'
       responses:
         '200':
-          description: Response of attempt to update AR transactions with intent to pay.
+          description: Response of attempt to update AR transactions with
+            intent to pay.
         '400':
           description: Validation failed.
           content:
@@ -158,7 +171,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object 
+              type: object
               required:
                 - companyCode
                 - paymentId
@@ -211,7 +224,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object 
+              type: object
               required:
                 - companyCode
                 - paymentId
@@ -235,7 +248,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object 
+              type: object
               required:
                 - companyCode
                 - paymentId
@@ -259,7 +272,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object 
+              type: object
               required:
                 - companyCode
                 - paymentId
@@ -428,7 +441,7 @@ components:
           format: float
           example: 150.00
     Error400:
-      type: object 
+      type: object
       properties:
         httpStatusCode:
           type: integer
@@ -455,7 +468,7 @@ components:
           items:
             $ref: '#/components/schemas/SubError'
     Error404:
-      type: object 
+      type: object
       properties:
         httpStatusCode:
           type: integer

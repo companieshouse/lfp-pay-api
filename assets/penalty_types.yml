@@ -1,3 +1,4 @@
+---
 description: transaction types and subtypes of allowed penalties
 allowed_transactions:
   1:
@@ -8,166 +9,166 @@ allowed_transactions:
     C3:
       true
     C4:
-        true
+      true
     C5:
-        true
+      true
     C6:
-        true
+      true
     C7:
-        true
+      true
     C8:
-        true
+      true
     EA:
-        true
+      true
     EB:
-        true
+      true
     EC:
-        true
+      true
     ED:
-        true
+      true
     EE:
-        true
+      true
     EF:
-        true
+      true
     EG:
-        true
+      true
     EH:
-        true
+      true
     EI:
-        true
+      true
     EJ:
-        true
+      true
     EK:
-        true
+      true
     EL:
-        true
+      true
     EM:
-        true
+      true
     EN:
-        true
+      true
     EO:
-        true
+      true
     EP:
-        true
+      true
     EQ:
-        true
+      true
     ER:
-        true
+      true
     ES:
-        true
+      true
     ET:
-        true
+      true
     EU:
-        true
+      true
     EV:
-        true
+      true
     EW:
-        true
+      true
     EX:
-        true
+      true
     HU:
-        true
+      true
     HV:
-        true
+      true
     HW:
-        true
+      true
     HX:
-        true
+      true
     NA:
-        true
+      true
     NB:
-        true
+      true
     NC:
-        true
+      true
     ND:
-        true
+      true
     NE:
-        true
+      true
     NF:
-        true
+      true
     NG:
-        true
+      true
     NH:
-        true
+      true
     NI:
-        true
+      true
     NJ:
-        true
+      true
     NK:
-        true
+      true
     NL:
-        true
+      true
     NM:
-        true
+      true
     NN:
-        true
+      true
     NO:
-        true
+      true
     NP:
-        true
+      true
     NQ:
-        true
+      true
     NR:
-        true
+      true
     NS:
-        true
+      true
     NT:
-        true
+      true
     NU:
-        true
+      true
     NV:
-        true
+      true
     NW:
-        true
+      true
     NX:
-        true
+      true
     SA:
-        true
+      true
     SB:
-        true
+      true
     SC:
-        true
+      true
     SD:
-        true
+      true
     SE:
-        true
+      true
     SF:
-        true
+      true
     SG:
-        true
+      true
     SH:
-        true
+      true
     SI:
-        true
+      true
     SJ:
-        true
+      true
     SK:
-        true
+      true
     SL:
-        true
+      true
     SM:
-        true
+      true
     SN:
-        true
+      true
     SO:
-        true
+      true
     SP:
-        true
+      true
     SQ:
-        true
+      true
     SR:
-        true
+      true
     SS:
-        true
+      true
     ST:
-        true
+      true
     SU:
-        true
+      true
     SV:
-        true
+      true
     SW:
-        true
+      true
     SX:
-        true
+      true
     SY:
-        true
+      true
