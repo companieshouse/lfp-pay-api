@@ -35,7 +35,7 @@ func TransactionsArePayable(companyNumber string, txs []models.TransactionItem) 
 	itemMap := map[string]models.TransactionListItem{}
 	for _, tx := range response.Items {
 		itemMap[tx.ID] = tx
-		if !tx.IsPaid && tx.Type == "penalty" {
+		if isPenaltyTransaction(tx) {
 			payablePenaltyCount++
 		}
 	}
@@ -62,31 +62,9 @@ func TransactionsArePayable(companyNumber string, txs []models.TransactionItem) 
 			return nil, ErrTransactionDoesNotExist
 		}
 
-		if val.IsPartPaid() {
-			log.Info("the penalty that is trying to be paid is already part paid", data)
-			return nil, ErrTransactionIsPartPaid
-		}
-
-		if val.IsPaid {
-			log.Info("disallowing paying for a transaction that is already paid", data)
-			return nil, ErrTransactionIsPaid
-		}
-
-		if val.Type != "penalty" {
-			log.Info("disallowing paying for a transaction that is not a penalty", data)
-			return nil, ErrTransactionNotPayable
-		}
-
-		if val.Outstanding != t.Amount {
-			data["attempted_amount"] = fmt.Sprintf("%f", t.Amount)
-			data["outstanding_amount"] = fmt.Sprintf("%f", val.Outstanding)
-			log.Info("disallowing paying for transaction as attempting to pay off partial balance", data)
-			return nil, ErrTransactionAmountMismatch
-		}
-
-		if val.IsDCA {
-			log.Info("the transaction that is trying to be paid is with a debt collecting agency", data)
-			return nil, ErrTransactionDCA
+		items, err2, done := checkVal(val, data, t)
+		if done {
+			return items, err2
 		}
 
 		validTx := models.TransactionItem{
@@ -101,4 +79,40 @@ func TransactionsArePayable(companyNumber string, txs []models.TransactionItem) 
 	}
 
 	return validTxs, nil
+}
+
+func checkVal(val models.TransactionListItem,
+	data map[string]interface{},
+	t models.TransactionItem) ([]models.TransactionItem, error, bool) {
+	if val.IsPartPaid() {
+		log.Info("the penalty that is trying to be paid is already part paid", data)
+		return nil, ErrTransactionIsPartPaid, true
+	}
+
+	if val.IsPaid {
+		log.Info("disallowing paying for a transaction that is already paid", data)
+		return nil, ErrTransactionIsPaid, true
+	}
+
+	if val.Type != "penalty" {
+		log.Info("disallowing paying for a transaction that is not a penalty", data)
+		return nil, ErrTransactionNotPayable, true
+	}
+
+	if val.Outstanding != t.Amount {
+		data["attempted_amount"] = fmt.Sprintf("%f", t.Amount)
+		data["outstanding_amount"] = fmt.Sprintf("%f", val.Outstanding)
+		log.Info("disallowing paying for transaction as attempting to pay off partial balance", data)
+		return nil, ErrTransactionAmountMismatch, true
+	}
+
+	if val.IsDCA {
+		log.Info("the transaction that is trying to be paid is with a debt collecting agency", data)
+		return nil, ErrTransactionDCA, true
+	}
+	return nil, nil, false
+}
+
+func isPenaltyTransaction(tx models.TransactionListItem) bool {
+	return !tx.IsPaid && tx.Type == "penalty"
 }

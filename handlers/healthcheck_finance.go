@@ -27,42 +27,13 @@ func HandleHealthCheckFinanceSystem(w http.ResponseWriter, r *http.Request) {
 	var systemAvailableTime time.Time
 
 	// Check for weekly downtime
-	if cfg.WeeklyMaintenanceStartTime != "" && cfg.WeeklyMaintenanceEndTime != "" {
-		// If the weekday is maintenance day
-		if currentTime.Weekday() == cfg.WeeklyMaintenanceDay {
-
-			weeklyMaintenanceStartTime := returnWeeklyMaintenanceTime(cfg.WeeklyMaintenanceStartTime[:2], cfg.WeeklyMaintenanceStartTime[2:])
-
-			weeklyMaintenanceEndTime := returnWeeklyMaintenanceTime(cfg.WeeklyMaintenanceEndTime[:2], cfg.WeeklyMaintenanceEndTime[2:])
-
-			// Check if time is within maintenance time
-			if weeklyMaintenanceEndTime.After(currentTime) && weeklyMaintenanceStartTime.Before(currentTime) {
-				systemAvailableTime = weeklyMaintenanceEndTime
-				systemUnavailable = true
-			}
-		}
-	}
+	systemAvailableTime, systemUnavailable = checkWeeklyDownTime(cfg,
+		currentTime, systemAvailableTime, systemUnavailable)
 
 	// Check for planned maintenance
-	if cfg.PlannedMaintenanceStart != "" && cfg.PlannedMaintenanceEnd != "" {
-		timeDateLayout := "02 Jan 06 15:04 MST"
-		maintenanceStart, err := time.Parse(timeDateLayout, cfg.PlannedMaintenanceStart)
-		if err != nil {
-			log.ErrorR(r, fmt.Errorf("error parsing Maintenance Start time: [%v]", err))
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		maintenanceEnd, err := time.Parse(timeDateLayout, cfg.PlannedMaintenanceEnd)
-		if err != nil {
-			log.ErrorR(r, fmt.Errorf("error parsing Maintenance End time: [%v]", err))
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-
-		if maintenanceEnd.After(currentTime) && maintenanceStart.Before(currentTime) && maintenanceEnd.After(systemAvailableTime) {
-			systemAvailableTime = maintenanceEnd
-			systemUnavailable = true
-		}
+	systemAvailableTime, systemUnavailable, parseError := checkPlannedMaintenance(w, r, cfg, currentTime, systemAvailableTime, systemUnavailable)
+	if parseError {
+		return
 	}
 
 	if systemUnavailable {
@@ -74,6 +45,69 @@ func HandleHealthCheckFinanceSystem(w http.ResponseWriter, r *http.Request) {
 
 	m := models.NewMessageResponse("HEALTHY")
 	utils.WriteJSON(w, r, m)
+}
+
+func checkPlannedMaintenance(w http.ResponseWriter,
+	r *http.Request,
+	cfg *config.Config,
+	currentTime time.Time,
+	systemAvailableTime time.Time,
+	systemUnavailable bool) (time.Time, bool, bool) {
+	if isPlannedMaintenanceCheckRequired(cfg) {
+		timeDateLayout := "02 Jan 06 15:04 MST"
+		maintenanceStart, err := time.Parse(timeDateLayout, cfg.PlannedMaintenanceStart)
+		if err != nil {
+			log.ErrorR(r, fmt.Errorf("error parsing Maintenance Start time: [%v]", err))
+			w.WriteHeader(http.StatusInternalServerError)
+			return time.Time{}, false, true
+		}
+		maintenanceEnd, err := time.Parse(timeDateLayout, cfg.PlannedMaintenanceEnd)
+		if err != nil {
+			log.ErrorR(r, fmt.Errorf("error parsing Maintenance End time: [%v]", err))
+			w.WriteHeader(http.StatusInternalServerError)
+			return time.Time{}, false, true
+		}
+
+		if maintenanceEnd.After(currentTime) && maintenanceStart.Before(currentTime) && maintenanceEnd.After(systemAvailableTime) {
+			systemAvailableTime = maintenanceEnd
+			systemUnavailable = true
+		}
+	}
+	return systemAvailableTime, systemUnavailable, false
+}
+
+func checkWeeklyDownTime(cfg *config.Config,
+	currentTime time.Time,
+	systemAvailableTime time.Time,
+	systemUnavailable bool) (time.Time, bool) {
+	if isWeeklyMaintenanceTimeCheckRequired(cfg) {
+		// If the weekday is maintenance day
+		if currentTime.Weekday() == cfg.WeeklyMaintenanceDay {
+
+			weeklyMaintenanceStartTime := returnWeeklyMaintenanceTime(cfg.WeeklyMaintenanceStartTime[:2], cfg.WeeklyMaintenanceStartTime[2:])
+
+			weeklyMaintenanceEndTime := returnWeeklyMaintenanceTime(cfg.WeeklyMaintenanceEndTime[:2], cfg.WeeklyMaintenanceEndTime[2:])
+
+			// Check if time is within maintenance time
+			if isWithinMaintenanceTime(weeklyMaintenanceEndTime, currentTime, weeklyMaintenanceStartTime) {
+				systemAvailableTime = weeklyMaintenanceEndTime
+				systemUnavailable = true
+			}
+		}
+	}
+	return systemAvailableTime, systemUnavailable
+}
+
+func isPlannedMaintenanceCheckRequired(cfg *config.Config) bool {
+	return cfg.PlannedMaintenanceStart != "" && cfg.PlannedMaintenanceEnd != ""
+}
+
+func isWithinMaintenanceTime(weeklyMaintenanceEndTime time.Time, currentTime time.Time, weeklyMaintenanceStartTime time.Time) bool {
+	return weeklyMaintenanceEndTime.After(currentTime) && weeklyMaintenanceStartTime.Before(currentTime)
+}
+
+func isWeeklyMaintenanceTimeCheckRequired(cfg *config.Config) bool {
+	return cfg.WeeklyMaintenanceStartTime != "" && cfg.WeeklyMaintenanceEndTime != ""
 }
 
 // returnWeeklyMaintenanceTime returns a time.Time format for the current date with the hour and minute set to the arguments passed
