@@ -3,9 +3,7 @@ module github.com/companieshouse/lfp-pay-api
 go 1.16
 
 require (
-	github.com/DataDog/zstd v1.5.2 // indirect
 	github.com/Shopify/sarama v1.36.0 // indirect
-	github.com/aws/aws-sdk-go v1.29.15 // indirect
 	github.com/companieshouse/api-sdk-go v0.1.35
 	github.com/companieshouse/chs.go v1.2.8
 	github.com/companieshouse/envconf v0.1.4 // indirect
@@ -16,20 +14,14 @@ require (
 	github.com/companieshouse/lfp-pay-api-core v1.0.7
 	github.com/companieshouse/private-api-sdk-go v0.1.13 // indirect
 	github.com/go-playground/universal-translator v0.18.0 // indirect
-	github.com/go-stack/stack v1.8.1 // indirect
-	github.com/gobuffalo/genny v0.1.1 // indirect
-	github.com/gobuffalo/gogen v0.1.1 // indirect
 	github.com/golang/mock v1.6.0
 	github.com/gorilla/mux v1.8.0
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/jarcoal/httpmock v1.0.4
-	github.com/karrick/godirwalk v1.10.3 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d // indirect
 	github.com/montanaflynn/stats v0.6.6 // indirect
-	github.com/pelletier/go-toml v1.4.0 // indirect
-	github.com/pierrec/lz4 v2.6.1+incompatible // indirect
 	github.com/smartystreets/goconvey v1.7.2
 	github.com/youmark/pkcs8 v0.0.0-20201027041543-1326539a0a0a // indirect
 	go.mongodb.org/mongo-driver v1.10.2
@@ -40,7 +32,5 @@ require (
 	golang.org/x/sys v0.0.0-20220908164124-27713097b956 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/go-playground/validator.v9 v9.31.0
-	gopkg.in/jcmturner/goidentity.v3 v3.0.0 // indirect
-	gopkg.in/jcmturner/gokrb5.v7 v7.5.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0
 )
