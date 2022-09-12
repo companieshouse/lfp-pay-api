@@ -23,26 +23,8 @@ type PayableAuthenticationInterceptor struct {
 // PayableAuthenticationIntercept checks that the user is authenticated for the payable_resource
 func (payableAuthInterceptor *PayableAuthenticationInterceptor) PayableAuthenticationIntercept(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Check for a company_number and payable_id in request
-		vars := mux.Vars(r)
-		companyNumber := strings.ToUpper(vars["company_number"])
-		if companyNumber == "" {
-			log.InfoR(r, "PayableAuthenticationInterceptor error: no company_number")
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-		payableID := vars["payable_id"]
-		if payableID == "" {
-			log.InfoR(r, "PayableAuthenticationInterceptor error: no payable_id")
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-
-		// Get identity type from request
-		identityType := authentication.GetAuthorisedIdentityType(r)
-		if isUnauthorizedIdentityType(identityType) {
-			log.InfoR(r, "PayableAuthenticationInterceptor unauthorised: not oauth2 or API key identity type")
-			w.WriteHeader(http.StatusUnauthorized)
+		companyNumber, payableID, identityType, err := preCheckRequest(w, r)
+		if err {
 			return
 		}
 
@@ -92,35 +74,61 @@ func (payableAuthInterceptor *PayableAuthenticationInterceptor) PayableAuthentic
 			"request_method":                             r.Method,
 		}
 
-		checkAllowedThrough(w, r, authUserIsPayableResourceCreator, debugMap, next, ctx, authUserHasPenaltyLookupRole, isGetRequest, isAPIKeyRequest, apiKeyHasElevatedPrivileges)
+		booleans := booleanParameters{authUserIsPayableResourceCreator,
+			authUserHasPenaltyLookupRole, isGetRequest,
+			isAPIKeyRequest, apiKeyHasElevatedPrivileges}
+
+		checkAllowedThrough(w, r, debugMap, next, ctx, booleans)
 	})
+}
+
+func preCheckRequest(w http.ResponseWriter, r *http.Request) (string, string, string, bool) {
+	// Check for a company_number and payable_id in request
+	vars := mux.Vars(r)
+	companyNumber := strings.ToUpper(vars["company_number"])
+	if companyNumber == "" {
+		log.InfoR(r, "PayableAuthenticationInterceptor error: no company_number")
+		w.WriteHeader(http.StatusBadRequest)
+		return "", "", "", true
+	}
+	payableID := vars["payable_id"]
+	if payableID == "" {
+		log.InfoR(r, "PayableAuthenticationInterceptor error: no payable_id")
+		w.WriteHeader(http.StatusBadRequest)
+		return "", "", "", true
+	}
+
+	// Get identity type from request
+	identityType := authentication.GetAuthorisedIdentityType(r)
+	if isUnauthorizedIdentityType(identityType) {
+		log.InfoR(r, "PayableAuthenticationInterceptor unauthorised: not oauth2 or API key identity type")
+		w.WriteHeader(http.StatusUnauthorized)
+		return "", "", "", true
+	}
+	return companyNumber, payableID, identityType, false
 }
 
 func checkAllowedThrough(w http.ResponseWriter,
 	r *http.Request,
-	authUserIsPayableResourceCreator bool,
 	debugMap log.Data,
 	next http.Handler,
 	ctx context.Context,
-	authUserHasPenaltyLookupRole bool,
-	isGetRequest bool,
-	isAPIKeyRequest bool,
-	apiKeyHasElevatedPrivileges bool) {
+	b booleanParameters) {
 	// Now that we have the payable resource data and authorized user there are
 	// multiple cases that can be allowed through:
 	switch {
-	case authUserIsPayableResourceCreator:
+	case b.authUserIsPayableResourceCreator:
 		// 1) Authorized user created the payable_resource
 		log.InfoR(r, "PayableAuthenticationInterceptor authorised as creator", debugMap)
 		// Call the next handler
 		next.ServeHTTP(w, r.WithContext(ctx))
-	case isAuthorizedGetRequest(authUserHasPenaltyLookupRole, isGetRequest):
+	case isAuthorizedGetRequest(b.authUserHasPenaltyLookupRole, b.isGetRequest):
 		// 2) Authorized user has permission to lookup any payable_resource and
 		// request is a GET i.e. to see payable_resource data but not modify/delete
 		log.InfoR(r, "PayableAuthenticationInterceptor authorised as admin penalty lookup role on GET", debugMap)
 		// Call the next handler
 		next.ServeHTTP(w, r.WithContext(ctx))
-	case isAuthorizedApiKeyRequest(isAPIKeyRequest, apiKeyHasElevatedPrivileges):
+	case isAuthorizedApiKeyRequest(b.isAPIKeyRequest, b.apiKeyHasElevatedPrivileges):
 		// 3) Authorized API key with elevated privileges is an internal API key
 		// that we trust
 		log.InfoR(r, "PayableAuthenticationInterceptor authorised as api key elevated user", debugMap)
@@ -180,4 +188,12 @@ func isAuthorizedApiKeyRequest(isAPIKeyRequest bool,
 func isAuthorizedGetRequest(authUserHasPenaltyLookupRole bool,
 	isGetRequest bool) bool {
 	return authUserHasPenaltyLookupRole && isGetRequest
+}
+
+type booleanParameters struct {
+	authUserIsPayableResourceCreator bool
+	authUserHasPenaltyLookupRole     bool
+	isGetRequest                     bool
+	isAPIKeyRequest                  bool
+	apiKeyHasElevatedPrivileges      bool
 }
