@@ -1,0 +1,19 @@
+{
+    "type": "Service",
+    "name": "lfp-pay-api",
+    "description": "The Companies House Web Service for handling payments of LFPs.",
+    "owned_by": "Titans",
+    "git_repo": "https://github.com/companieshouse/lfp-pay-api",
+    "public": "true",
+    "users": "public",
+    "specification":"https://raw.githubusercontent.com/companieshouse/lfp-pay-api/master/spec/e5ArTransactions-1.1-swagger.yaml",
+    "code_analysis_link": "http://code-analysis.platform.aws.chdev.org:9000/dashboard?id=uk.gov.companieshouse%3Alfp-pay-api#",    
+    "service_area": "Intelligence and Enforcement",
+    "service_component": "LFP",
+    "language": "GoLang",
+    "integration_outgoing": [
+      "chs-email-sender,KAFKA_TOPIC_EMAIL_SEND",
+      "company-profile-api,CALLS_API",
+      "e5,CALLS_API"
+    ]
+  }
